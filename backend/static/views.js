@@ -1,7 +1,15 @@
 /* Vistas por rol. Cada función devuelve HTML a partir de S (instantánea del servidor) y ui. */
 
 // ---------- ingreso y registro ----------
-function brand(){ return '<h1 class="brand">Logística Forestal<span style="display:block;color:var(--accent)">Pindó SA</span></h1>'; }
+function brand(){
+  return '<div class="brand-header">' +
+    '<img class="brand-img" src="/static/img/logo-pindo.png" alt="Pindó SA" width="96" height="71">' +
+    '<div class="brand-title-wrap">' +
+      '<h1 class="brand">Logística Forestal<span style="display:block;color:var(--accent)">Pindó SA</span></h1>' +
+      '<span class="brand-tagline">Puerto Esperanza · Misiones</span>' +
+    '</div>' +
+  '</div>';
+}
 function viewLogin(){
   return '<div class="login">' + brand() + '<p class="lead">Ingresá con tu usuario.</p><form data-form="login" novalidate>' +
     '<div class="field"><label for="lg-u">Usuario</label><input class="input" id="lg-u" name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false"></div>' +
@@ -138,7 +146,8 @@ function roleBar(){
   var esDark = document.documentElement.getAttribute('data-theme') === 'dark' || (!document.documentElement.getAttribute('data-theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   var iconTema = esDark ? ICON.sun : ICON.moon;
   var titleTema = esDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
-  return '<div class="bar">' + (S && S.modo_prueba ? '<span class="demo">Modo de prueba</span>' : '') + connChip() +
+  return '<div class="bar-pindo-strip" aria-hidden="true"></div>' +
+    '<div class="bar">' + (S && S.modo_prueba ? '<span class="demo">Modo de prueba</span>' : '') + connChip() +
     '<div class="bar-actions">' +
     '<button class="rolbtn icon-only" data-action="toggle-theme" title="' + titleTema + '" aria-label="' + titleTema + '">' + iconTema + '</button>' +
     '<button class="rolbtn" data-action="actualizar" aria-label="Actualizar datos">' + (ui.cargando ? '<span class="spinner"></span>' : '<svg class="ico-refresh" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>') + ' Actualizar · ' + esc(ui.updAt || '--:--') + '</button>' +

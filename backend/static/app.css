@@ -18,9 +18,15 @@
   --muted-light: #71897B;
   --line: #D3DFD7;
   --line-strong: #B5C9BD;
-  --accent: #115E3B;
-  --accent-hover: #0A4329;
-  --accent-soft: rgba(17, 94, 59, 0.1);
+  /* Paleta Oficial Pindó SA (extraída del isotipo de las 4 palmeras) */
+  --pindo-lime: #8FCB28;
+  --pindo-leaf: #2F9F3C;
+  --pindo-forest: #23643F;
+  --pindo-pine: #10372B;
+  --pindo-strip: linear-gradient(90deg, #8FCB28 0% 25%, #2F9F3C 25% 50%, #23643F 50% 75%, #10372B 75% 100%);
+  --accent: #23643F;
+  --accent-hover: #10372B;
+  --accent-soft: rgba(35, 100, 63, 0.12);
   --accent-ink: #FFFFFF;
   --fino: #0284C7;
   --grueso: #B45309;
@@ -123,9 +129,15 @@
   --muted-light: #71897B;
   --line: #D3DFD7;
   --line-strong: #B5C9BD;
-  --accent: #115E3B;
-  --accent-hover: #0A4329;
-  --accent-soft: rgba(17, 94, 59, 0.1);
+  /* Paleta Oficial Pindó SA (extraída del isotipo de las 4 palmeras) */
+  --pindo-lime: #8FCB28;
+  --pindo-leaf: #2F9F3C;
+  --pindo-forest: #23643F;
+  --pindo-pine: #10372B;
+  --pindo-strip: linear-gradient(90deg, #8FCB28 0% 25%, #2F9F3C 25% 50%, #23643F 50% 75%, #10372B 75% 100%);
+  --accent: #23643F;
+  --accent-hover: #10372B;
+  --accent-soft: rgba(35, 100, 63, 0.12);
   --accent-ink: #FFFFFF;
   --fino: #0284C7;
   --grueso: #B45309;
@@ -576,6 +588,55 @@ button.pend {
   opacity: 0.45;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+/* Franja institucional superior Pindó */
+.bar-pindo-strip {
+  height: 4px;
+  width: 100%;
+  background: var(--pindo-strip);
+  display: block;
+  border-radius: 4px 4px 0 0;
+}
+
+/* Cabecera de marca con logo institucional */
+.brand-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  margin: 16px 0 20px;
+}
+
+.brand-img {
+  display: block;
+  max-width: 112px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(16, 55, 43, 0.1);
+  background: #FFFFFF;
+  padding: 6px;
+  border: 1px solid var(--line);
+}
+
+.brand-title-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.brand-title-wrap .brand {
+  margin: 0;
+}
+
+.brand-tagline {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pindo-forest);
+  margin-top: 4px;
 }
 
 /* Selección de rol e Ingreso */
