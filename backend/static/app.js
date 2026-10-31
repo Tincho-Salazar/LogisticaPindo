@@ -19,7 +19,7 @@
       if(!TABS[ui.rol].some(function(t){ return t[0] === ui.tab; })) ui.tab = defaultTab(ui.rol);
       var ro = soloLectura();
       var body; try{ body = bodyHtml(); }catch(e){ body = '<div class="empty">No se pudo dibujar esta pantalla: ' + esc(e.message) + '</div>'; console.error(e); }
-      html = '<div' + (ro ? ' class="ro"' : '') + '>' + header() + roleBar() + (ro ? '<p class="note" style="margin:8px 0 0"><b>Vista de solo lectura</b> · Jefe de Área Forestal. Podés mirar este panel pero no modificar datos.</p>' : '') + body + nav() + '</div>';
+      html = '<div' + (ro ? ' class="ro"' : '') + '>' + header() + roleBar() + (ro ? '<p class="note" style="margin:8px 0 0"><b>Vista de solo lectura</b> · ' + (misRoles().indexOf('admin') >= 0 ? 'Administración' : 'Jefe de Área Forestal') + '. Podés mirar este panel pero no modificar datos.</p>' : '') + body + nav() + '</div>';
     }
     app.innerHTML = html + sheetHtml() + (ui.msg ? '<div class="toast' + (ui.msgErr ? ' err' : '') + '" role="status">' + esc(ui.msg) + '</div>' : '');
     window.scrollTo(0, y);
@@ -39,6 +39,7 @@
     ui.cargando = true; if(manual) render();
     cargandoEstado = API.llamar('GET', '/estado?' + paramsEstado()).then(function(s){
       S = s; ui.off = false; ui.updAt = hm(S.ahora); API.guardarEstado(S);
+      if(S.me && S.me.roles){ var ses = API.sesion(); if(ses && ses.usuario){ ses.usuario.roles = S.me.roles; try{ if(localStorage.getItem('lf.sesion')) localStorage.setItem('lf.sesion', JSON.stringify(ses)); }catch(x){} } } // roles vigentes sin re-login; no revive una sesión ya cerrada
       if(ui.rol === 'transportista' && ui.camionId && !S.camion_id){ ui.camionId = null; savePref(); }
       if(manual) toast('Datos actualizados');
       if(ui.tab === 'analisis') cargarAnalisis(true);
@@ -65,7 +66,7 @@
         API.encolar({ metodo: metodo, ruta: ruta, body: body, desc: opt.desc || '' });
         if(opt.optimista){ try{ opt.optimista(); }catch(x){ console.error(x); } }
         if(S) API.guardarEstado(S);
-        ui.off = true; toast('Sin conexión: la acción queda pendiente de enviar'); render();
+        ui.off = true; toast('Guardado en este dispositivo · se envía al servidor cuando vuelva la conexión'); render();
         return null;
       }
       throw e;
@@ -186,6 +187,8 @@
     if(a === 'acirc'){ ui.acirc = v; render(); cargarAnalisis(true); return; }
     if(a === 'avista'){ ui.avista = v; render(); return; }
     if(a === 'toggle-carga'){ ui.open[id] = !ui.open[id]; render(); return; }
+    if(a === 'outbox'){ openSheet({ type: 'outbox' }); return; }
+    if(a === 'falla-del'){ API.quitarFalla(id); render(); return; }
     if(soloLectura()){ toast('Vista de solo lectura', true); return; }
     var c = camion(cid());
     if(a === 'dispm'){ if(!dispAbierta()) return; accion('PUT', '/camiones/' + cid() + '/disponibilidad-manana', { valor: v }, { desc: 'disponibilidad', optimista: function(){ c.disp_manana = { valor: v, respondida_en: isoLocal() }; } }).catch(function(e){ toast(errorTexto(e), true); }); }
@@ -203,11 +206,11 @@
     else if(a === 'baja-camion'){ openSheet({ type: 'baja', id: id }); }
     else if(a === 'new-pila'){ openSheet({ type: 'pila', id: null, contr: el.getAttribute('data-contr') || '' }); }
     else if(a === 'edit-pila'){ openSheet({ type: 'pila', id: id }); }
-    else if(a === 'del-pila'){ var p = pila(id); accion('DELETE', '/pilas/' + id, null, { desc: 'quitar pila', optimista: function(){ S.pilas = pilas().filter(function(x){ return x.id !== id; }); } }).then(ok()).catch(fallo); }
+    else if(a === 'del-pila'){ if(!confirm('¿Quitar esta pila del relevamiento? Su volumen deja de contarse como stock disponible.')) return; var p = pila(id); accion('DELETE', '/pilas/' + id, null, { desc: 'quitar pila', optimista: function(){ S.pilas = pilas().filter(function(x){ return x.id !== id; }); } }).then(ok()).catch(fallo); }
     else if(a === 'reporte' || a === 'rep-pdf'){ toast('Generando el reporte…'); API.descargar('/reportes/stock.pdf', 'Stock-Pindo-' + S.hoy + '.pdf').then(function(){ toast('Reporte descargado'); }).catch(function(e){ toast(errorTexto(e), true); }); }
     else if(a === 'rep-fletes'){ toast('Generando el reporte…'); API.descargar('/camiones/' + cid() + '/reportes/fletes.pdf', 'Fletes-' + normPat(c.patente) + '-' + S.hoy + '.pdf').then(function(){ toast('Reporte descargado'); }).catch(function(e){ toast(errorTexto(e), true); }); }
     else if(a === 'programar'){ ui.draft = { sel: {}, hora: {}, open: {} }; if(id){ var c0 = contratistas()[0]; if(c0){ ui.draft.sel[id] = c0.id; ui.draft.open[c0.id] = true; } } openSheet({ type: 'programar', dia: id ? 'hoy' : ui.fdia }); }
-    else if(a === 'quitar-prog'){ accion('DELETE', '/programa/items/' + id, null, { offline: false }).catch(function(e){ toast(errorTexto(e), true); }); }
+    else if(a === 'quitar-prog'){ if(!confirm('¿Quitar este camión del programa?')) return; accion('DELETE', '/programa/items/' + id, null, { offline: false }).catch(function(e){ toast(errorTexto(e), true); }); }
     else if(a === 'emitir'){ openSheet({ type: 'emitir' }); }
     else if(a === 'prio'){ if(el.disabled) return; accion('PUT', '/programa/' + ui.fdia + '/prioridad/' + id, { prioridad: v }, { offline: false }).catch(function(e){ toast(errorTexto(e), true); }); }
     else if(a === 'solicitar'){ openSheet({ type: 'solic' }); }
@@ -226,7 +229,7 @@
     else if(a === 'finalizar'){ var k = carga(id), r0 = rodalesDe(k.contratista_id)[0]; ui.draft = { circuito: '', destino_id: '', rodal_id: r0 ? r0.id : '', lineas: [{ tipo: 'grueso', largo_pies: 10, m3: '' }] }; openSheet({ type: 'finalizar', id: id }); }
     else if(a === 'bas-salida'){ var m = (S.movimientos || []).filter(function(x){ return x.id === id; })[0]; accion('POST', '/bascula/ingresos/' + id + '/salida', null, { desc: 'salida de báscula', optimista: function(){ if(m){ m.salida_en = isoLocal(); var cm = camion(m.camion_id); if(cm && cm.estado === 'ruta') cm.estado = 'disponible'; } } }).catch(function(e){ toast(errorTexto(e), true); }); }
     else if(a === 'bas-hor-add'){ openSheet({ type: 'bashor', kind: v }); }
-    else if(a === 'bas-hor-del'){ var kk = el.getAttribute('data-k'); accion('DELETE', '/bascula/' + (kk === 'turno' ? 'turnos' : 'descansos') + '/' + id, null, { offline: false }).catch(function(e){ toast(errorTexto(e), true); }); }
+    else if(a === 'bas-hor-del'){ if(!confirm('¿Quitar este horario?')) return; var kk = el.getAttribute('data-k'); accion('DELETE', '/bascula/' + (kk === 'turno' ? 'turnos' : 'descansos') + '/' + id, null, { offline: false }).catch(function(e){ toast(errorTexto(e), true); }); }
     else if(a === 'rodal-new'){ openSheet({ type: 'rodal' }); }
     else if(a === 'rodal-baja'){ openSheet({ type: 'rodalbaja', rodal: id }); }
     else if(a === 'rodal-del'){ accion('DELETE', '/rodales/' + ui.sheet.rodal, null, { offline: false }).then(ok()).catch(fallo); }
@@ -244,7 +247,7 @@
         openSheet({ type: 'remito', editId: re.id });
       }
     }
-    else if(a === 'remito-del'){ accion('DELETE', '/remitos/' + id, null, { desc: 'eliminar remito', optimista: function(){ S.remitos = remitos().filter(function(x){ return x.id !== id; }); if(S.remitos_control) S.remitos_control = S.remitos_control.filter(function(x){ return x.id !== id; }); } }).then(ok()).catch(fallo); }
+    else if(a === 'remito-del'){ if(!confirm('¿Eliminar este remito? Se descuenta de la facturación y no se puede deshacer.')) return; accion('DELETE', '/remitos/' + id, null, { desc: 'eliminar remito', optimista: function(){ S.remitos = remitos().filter(function(x){ return x.id !== id; }); if(S.remitos_control) S.remitos_control = S.remitos_control.filter(function(x){ return x.id !== id; }); } }).then(ok()).catch(fallo); }
     else if(a === 'usuario-edit'){ var uu = (ui.usuarios || []).filter(function(x){ return x.id === id; })[0]; if(uu){ ui.draft = { u: uu }; openSheet({ type: 'usuario' }); } }
     else if(a === 'cat-new'){ openSheet({ type: 'catalogo', tipo: v }); }
     else if(a === 'cat-del'){ if(!confirm('¿Quitar este elemento del catálogo?')) return; accion('DELETE', '/catalogos/' + v + '/' + id, null, { offline: false }).catch(function(e){ toast(errorTexto(e), true); }); }
@@ -256,7 +259,9 @@
     if(f === 'm3'){ ui.draft.lineas[parseInt(t.getAttribute('data-i'), 10)].m3 = t.value; var tot = sum(ui.draft.lineas, function(l){ var n = numSimple(l.m3); return isFinite(n) ? n : 0; }), el = document.getElementById('tot'); if(el) el.textContent = f1(tot); }
     else if(f === 'pnota') ui.draft.nota = t.value;
     else if(f === 'proghora') ui.draft.hora[t.getAttribute('data-ci')] = t.value;
+    else if(f === 'rtn'){ ui.draft.toneladas = t.value; refrescarImporte(); }
   });
+  function refrescarImporte(){ var ri = document.getElementById('rimp'); if(ri && ui.draft) ri.innerHTML = remitoImporteTxt(ui.draft); }
   document.addEventListener('change', function(e){
     var t = e.target;
     if(t.id === 'rem-file'){ var fl0 = t.files && t.files[0]; t.value = ''; if(fl0) procesarRemito(fl0); return; }
@@ -265,8 +270,8 @@
     else if(f === 'llargo'){ ui.draft.lineas[parseInt(t.getAttribute('data-i'), 10)].largo_pies = parseInt(t.value, 10); ui.error = ''; render(); }
     else if(f === 'progcam'){ var pid = t.getAttribute('data-id'); if(t.checked) ui.draft.sel[pid] = t.getAttribute('data-ci'); else delete ui.draft.sel[pid]; ui.error = ''; actualizarProg(); }
     else if(f === 'proghora') ui.draft.hora[t.getAttribute('data-ci')] = t.value;
-    else if(f === 'destino') ui.draft.destino_id = t.value;
-    else if(f === 'rodal') ui.draft.rodal_id = t.value;
+    else if(f === 'destino'){ ui.draft.destino_id = t.value; refrescarImporte(); }
+    else if(f === 'rodal'){ ui.draft.rodal_id = t.value; refrescarImporte(); }
     else if(f === 'circuito'){ ui.draft.circuito = t.value; var d0 = destinos(t.value)[0]; ui.draft.destino_id = d0 ? d0.id : ''; ui.error = ''; render(); }
   });
   document.addEventListener('toggle', function(e){ var t = e.target; if(ui.draft && ui.draft.open && t.classList && t.classList.contains('acc')) ui.draft.open[t.getAttribute('data-ci')] = t.open; }, true);
@@ -276,6 +281,9 @@
   document.addEventListener('submit', function(e){
     e.preventDefault();
     var form = e.target, kind = form.getAttribute('data-form'), fd = new FormData(form), g = function(k){ return String(fd.get(k) == null ? '' : fd.get(k)).trim(); };
+    // Anti doble envío: el formulario queda bloqueado hasta el próximo render (éxito, error o validación lo redibujan).
+    if(form.getAttribute('data-busy')) return;
+    form.setAttribute('data-busy', '1'); var sb = form.querySelector('button[type=submit]'); if(sb) sb.disabled = true;
     if(kind === 'login'){
       ui.cargando = true; ui.error = ''; render();
       API.login(g('usuario').toLowerCase(), g('password')).then(function(){ ui.cargando = false; ui.rol = null; ui.step = null; S = null; render(); }).catch(function(e){ ui.cargando = false; ui.error = e.offline ? 'Sin conexión. Para ingresar por primera vez hace falta señal.' : errorTexto(e); render(); });

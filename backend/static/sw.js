@@ -1,7 +1,7 @@
 /* Service worker: guarda la cáscara de la app para abrirla sin conexión. La API nunca se cachea acá
    (los datos se guardan en localStorage desde api.js). */
-var VERSION = 'lf-v2';
-var SHELL = ['/', '/static/app.css', '/static/api.js', '/static/util.js', '/static/views.js', '/static/sheets.js', '/static/app.js', '/static/manifest.json', '/static/icons/icon-192.png', '/static/icons/icon-512.png'];
+var VERSION = 'lf-v3';
+var SHELL = ['/', '/static/app.css', '/static/api.js', '/static/util.js', '/static/views.js', '/static/sheets.js', '/static/app.js', '/static/manifest.json', '/static/fonts/Inter-latin.woff2', '/static/fonts/JetBrainsMono-latin.woff2', '/static/icons/icon-192.png', '/static/icons/icon-512.png'];
 
 self.addEventListener('install', function(e){
   e.waitUntil(caches.open(VERSION).then(function(c){ return c.addAll(SHELL); }).then(function(){ return self.skipWaiting(); }));

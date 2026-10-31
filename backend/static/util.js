@@ -161,7 +161,7 @@ function trazaSteps(k, conBotonRemito){
   '</div>';
 }
 function soloLectura(){ return !!(S && S.solo_lectura); }
-function esJefePuesto(){ var u = API.usuario(); return !!(u && u.puesto === 'Jefe de Área Forestal'); }
+function esJefePuesto(){ var u = API.usuario(); return !!(u && (u.puesto === 'Jefe de Área Forestal' || misRoles().indexOf('admin') >= 0)); }
 function misRoles(){ var u = API.usuario(); return (u && u.roles) || []; }
 function rolOk(r){ var rs = misRoles(); return rs.indexOf(r) >= 0 || (rs.indexOf('jefe') >= 0 && (r === 'transportista' || r === 'elaborador')); }
 function defaultTab(r){ return r === 'jefe' ? 'tarifas' : r === 'admin' ? 'usuarios' : r === 'elaborador' ? 'cola' : r === 'transportista' ? 'viaje' : r === 'bascula' ? 'pend' : 'stock'; }
@@ -192,4 +192,4 @@ function tablaItems(items){
 function progBar(pct){ return '<div class="prog" role="img" aria-label="Avance ' + pct + '%"><i style="width:' + pct + '%"></i></div>'; }
 function errHtml(){ return ui.error ? '<p class="err" role="alert">' + esc(ui.error) + '</p>' : ''; }
 function vacio(t, st){ return '<div class="empty"' + (st ? ' style="' + st + '"' : '') + '>' + t + '</div>'; }
-function pendHtml(){ var n = API.pendientes(); return n ? '<p class="pend">⏳ ' + n + ' cambio' + (n === 1 ? '' : 's') + ' pendiente' + (n === 1 ? '' : 's') + ' de enviar</p>' : ''; }
+function pendHtml(){ var n = API.pendientes(), f = API.fallas().length; if(!n && !f) return ''; return '<button type="button" class="pend' + (f ? ' err' : '') + '" data-action="outbox">' + (n ? n + ' cambio' + (n === 1 ? '' : 's') + ' guardado' + (n === 1 ? '' : 's') + ' en este dispositivo, pendiente' + (n === 1 ? '' : 's') + ' de enviar' : '') + (n && f ? ' · ' : '') + (f ? f + ' con error de sincronización' : '') + ' · ver</button>'; }

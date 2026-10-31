@@ -226,3 +226,4 @@ LogisticaPindo/
 ## 📄 Licencia
 
 Propiedad de **Pindó SA**. Todos los derechos reservados.
+

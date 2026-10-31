@@ -45,7 +45,9 @@ def roles_derivados(tipo_empresa, puesto):
 
 def roles_de(user):
     r = [x for x in (user.get("roles") or "").split(",") if x]
-    if config.MODO_PRUEBA and "admin" not in r:
+    if "admin" in r:  # el administrador entra a todos los perfiles
+        return list(ROLES)
+    if config.MODO_PRUEBA:
         r = list(dict.fromkeys(r + ["transportista", "elaborador", "supervisor", "bascula", "jefe"]))
     return r
 

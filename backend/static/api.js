@@ -54,7 +54,7 @@ var API = (function(){
   }
 
   // ---------- cola de salida ----------
-  var outbox = leer(OK) || [];
+  var outbox = leer(OK) || [], FK = 'lf.fallas', fallasPersist = leer(FK) || [];
   function isoAhora(){
     var d = new Date(), p = function(n){ return ('0' + n).slice(-2); };
     return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
@@ -95,8 +95,10 @@ var API = (function(){
           op.reintentos = (op.reintentos || 0) + 1;
           enviando = false; guardar(OK, outbox); return { enviados: n, fallas: fallas };
         }
-        // Error de negocio definitivo (409, 422...): se retira de la cola y se notifica a la app para resolver conflicto
-        outbox.shift(); guardar(OK, outbox); fallas.push({ op: op, error: e }); if(onCada) onCada(op, e); return paso();
+        // Error de negocio definitivo (409, 422...): se retira de la cola, queda registrado como "error de sincronización" y se notifica a la app
+        outbox.shift(); guardar(OK, outbox); fallas.push({ op: op, error: e });
+        fallasPersist.push({ id: op.id, desc: op.desc || op.ruta, creado_en: op.creado_en, en: isoAhora(), mensaje: e.mensaje, codigo: e.codigo }); guardar(FK, fallasPersist);
+        if(onCada) onCada(op, e); return paso();
       });
     }
     return paso();
@@ -125,6 +127,7 @@ var API = (function(){
     sesion: function(){ return sesion; }, usuario: function(){ return sesion && sesion.usuario; },
     estadoCache: function(){ return leer(SK); }, guardarEstado: function(s){ guardar(SK, s); },
     encolar: encolar, pendientes: pendientes, enviarCola: enviarCola, outbox: function(){ return outbox; },
+    fallas: function(){ return fallasPersist; }, quitarFalla: function(id){ fallasPersist = fallasPersist.filter(function(f){ return f.id !== id; }); guardar(FK, fallasPersist); },
     descargar: function(ruta, nombre){
       return llamar('GET', ruta, null, { blob: true }).then(function(b){
         var u = URL.createObjectURL(b), a = document.createElement('a'); a.href = u; a.download = nombre; document.body.appendChild(a); a.click();

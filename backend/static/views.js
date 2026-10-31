@@ -28,7 +28,7 @@ function viewPerfil(){
     '<div class="field"><label for="pf-n">Nombre y apellido</label><input class="input" id="pf-n" name="nombre" value="' + esc(u.nombre) + '"></div>' +
     '<div class="field"><label for="pf-e">Empresa</label><input class="input" id="pf-e" name="empresa" value="' + esc(u.empresa) + '"></div>' +
     '<div class="field"><span class="lb" id="lb-pf">Puesto</span><div class="seg" role="radiogroup" aria-labelledby="lb-pf" style="flex-wrap:wrap">' + PUESTOS.map(function(x){ return '<label><input type="radio" name="puesto" value="' + esc(x) + '"' + (u.puesto === x ? ' checked' : '') + '>' + esc(x) + '</label>'; }).join('') + '</div></div>' +
-    errHtml() + '<button class="btn primary block" type="submit">Guardar</button><button type="button" class="btn block" data-action="cancelar-perfil" style="margin-top:8px">Cancelar</button></form></div>';
+    errHtml() + '<button class="btn primary block" type="submit">Guardar cambios</button><button type="button" class="btn block" data-action="cancelar-perfil" style="margin-top:8px">Cancelar</button></form></div>';
 }
 
 // ---------- selección de rol ----------
@@ -101,9 +101,11 @@ function header(){
   return '<header class="top"><div style="min-width:0"><h1>' + title + '</h1><p class="sub">' + sub + '</p></div>' + (ro ? '' : act) + '</header>';
 }
 function connChip(){
-  var off = ui.off || navigator.onLine === false, n = API.pendientes();
+  var off = ui.off || navigator.onLine === false, n = API.pendientes(), f = API.fallas().length;
   var txt = off ? 'Sin conexión · Guardado en este dispositivo' + (n ? ' · ' + n + ' pendiente' + (n === 1 ? '' : 's') + ' sin enviar' : '') : (n ? n + ' pendiente' + (n === 1 ? '' : 's') + ' sin enviar · sincronizando…' : 'En línea · Confirmado en servidor');
-  return '<span class="conn' + (off ? ' off' : n ? ' sync' : ' ok') + '" role="status">' + txt + '</span>';
+  if(f) txt += ' · ' + f + ' con error';
+  var cls = 'conn' + (f ? ' err' : off ? ' off' : n ? ' sync' : ' ok');
+  return (n || f) ? '<button class="' + cls + '" data-action="outbox" title="Ver operaciones pendientes y errores de sincronización">' + txt + ' · ver</button>' : '<span class="' + cls + '" role="status">' + txt + '</span>';
 }
 function flujoSupervisorBar(){
   var ac = activos(), progHoy = programa().filter(function(g){ return g.jornada === S.hoy; });
@@ -139,7 +141,7 @@ function roleBar(){
   return '<div class="bar">' + (S && S.modo_prueba ? '<span class="demo">Modo de prueba</span>' : '') + connChip() +
     '<div class="bar-actions">' +
     '<button class="rolbtn icon-only" data-action="toggle-theme" title="' + titleTema + '" aria-label="' + titleTema + '">' + iconTema + '</button>' +
-    '<button class="rolbtn" data-action="actualizar" aria-label="Actualizar datos">' + (ui.cargando ? '<span class="spinner"></span>' : '↻') + ' Actualizar · ' + esc(ui.updAt || '--:--') + '</button>' +
+    '<button class="rolbtn" data-action="actualizar" aria-label="Actualizar datos">' + (ui.cargando ? '<span class="spinner"></span>' : '<svg class="ico-refresh" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>') + ' Actualizar · ' + esc(ui.updAt || '--:--') + '</button>' +
     '<button class="rolbtn" data-action="cambiar-rol"><b>' + who + '</b> · cambiar rol</button>' +
     '</div></div>';
 }
@@ -165,7 +167,8 @@ function viewStock(){
     '<div class="legend" style="margin-top:10px"><span>Stock Pindó SA <b>' + f1(fino + grueso - vt) + ' m³</b></span><span>Stock de ventas <b>' + f1(vt) + ' m³</b></span></div></section>';
   if(!el) out += '<button class="btn block" data-action="reporte" style="margin-top:12px">Generar reporte en PDF</button>';
   if(el && relCerrado()) out += '<div class="incbox inc-demora" style="margin-top:12px"><b>Relevamiento cerrado</b> · Cerró a las ' + S.cierres.relevamiento + ' hs. Mañana podés volver a relevar.</div>';
-  out += '<div class="chips" role="group" aria-label="Filtrar por tipo">' + [['todos', 'Todos'], ['fino', 'Rollo fino'], ['grueso', 'Rollo grueso']].map(function(x){ return '<button class="chip" data-action="ftipo" data-v="' + x[0] + '" aria-pressed="' + (ui.ftipo === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  var nTipo = function(t){ return base.filter(function(p){ return t === 'todos' || p.tipo === t; }).length; };
+  out += '<div class="chips" role="group" aria-label="Filtrar por tipo">' + [['todos', 'Todas'], ['fino', 'Rollo fino'], ['grueso', 'Rollo grueso']].map(function(x){ return '<button class="chip" data-action="ftipo" data-v="' + x[0] + '" aria-pressed="' + (ui.ftipo === x[0]) + '">' + x[1] + '<span class="c">' + nTipo(x[0]) + '</span></button>'; }).join('') + '</div>';
   var list = base.filter(function(p){ return ui.ftipo === 'todos' || p.tipo === ui.ftipo; });
   if(!list.length && ui.ftipo !== 'todos') return out + vacio('No hay pilas de este tipo relevadas.');
   var groups = {}, order = [];

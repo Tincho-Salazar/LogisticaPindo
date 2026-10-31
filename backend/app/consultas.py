@@ -13,8 +13,8 @@ def es_jefe(user):
 
 
 def es_jefe_puesto(user):
-    """El Jefe de Área Forestal entra a los paneles de transporte y cosecha sólo en modo lectura."""
-    return user.get("puesto") == "Jefe de Área Forestal"
+    """El Jefe de Área Forestal y el administrador entran a los paneles de transporte y cosecha sólo en modo lectura (ven todos los camiones y contratistas)."""
+    return user.get("puesto") == "Jefe de Área Forestal" or "admin" in user["roles_lista"]
 
 
 def camiones_propios(cn, user):

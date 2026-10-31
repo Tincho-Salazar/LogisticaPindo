@@ -39,7 +39,7 @@ function sheetIncidencia(){
   var t = ui.sheet.tipo, mec = t === 'mecanico';
   return '<h2>' + (mec ? 'Problema mecánico' : 'Demora') + '</h2><p class="hint">' + (mec ? 'El camión no va a poder cargar hasta que cierres la novedad.' : 'Avisá el motivo para que el supervisor y el elaborador reprogramen.') + '</p><form data-form="incidencia" novalidate>' +
     '<div class="field"><label for="f-mot">Motivo</label><select class="input" id="f-mot" name="motivo">' + MOTIVOS[t].map(function(m){ return '<option>' + m + '</option>'; }).join('') + '</select></div><div class="field"><label for="f-det">Detalle (opcional)</label><input class="input" id="f-det" name="detalle" autocomplete="off" placeholder="Qué pasó"></div>' +
-    (mec ? '' : '<div class="field"><label for="f-min">Demora estimada (minutos)</label><input class="input mono" id="f-min" name="minutos" inputmode="numeric" autocomplete="off" placeholder="30"></div>') + errHtml() + '<button class="btn primary block" type="submit">Avisar</button></form>';
+    (mec ? '' : '<div class="field"><label for="f-min">Demora estimada (minutos)</label><input class="input mono" id="f-min" name="minutos" inputmode="numeric" autocomplete="off" placeholder="30"></div>') + errHtml() + '<button class="btn primary block" type="submit">' + (mec ? 'Avisar problema mecánico' : 'Avisar demora') + '</button></form>';
 }
 
 function sheetEmitir(){
@@ -86,7 +86,7 @@ function sheetInicio(){
 function sheetBasHor(){
   var des = ui.sheet.kind === 'descanso';
   return '<h2>' + (des ? 'Descanso programado' : 'Horario disponible') + '</h2><p class="hint">' + (des ? 'Los transportistas lo ven en su panel para no llegar en ese horario.' : 'Franja en la que la báscula atiende. Los transportistas la ven en su panel.') + '</p><form data-form="bashor" novalidate><div class="two"><div class="field"><label for="bh-d">Desde</label><input class="input mono" id="bh-d" name="desde" type="time" value="' + (des ? '12:00' : '06:00') + '"></div><div class="field"><label for="bh-h">Hasta</label><input class="input mono" id="bh-h" name="hasta" type="time" value="' + (des ? '12:30' : '14:00') + '"></div></div>' +
-    (des ? '<div class="field"><label for="bh-m">Motivo (opcional)</label><input class="input" id="bh-m" name="motivo" autocomplete="off" placeholder="Ej.: Almuerzo, mantenimiento"></div>' : '') + errHtml() + '<button class="btn primary block" type="submit">Guardar</button></form>';
+    (des ? '<div class="field"><label for="bh-m">Motivo (opcional)</label><input class="input" id="bh-m" name="motivo" autocomplete="off" placeholder="Ej.: Almuerzo, mantenimiento"></div>' : '') + errHtml() + '<button class="btn primary block" type="submit">' + (des ? 'Guardar descanso' : 'Guardar horario') + '</button></form>';
 }
 
 function lineaHtml(prefix, l, i, puedeQuitar, delAction, extra){
@@ -151,9 +151,9 @@ function sheetRemito(){
   return '<h2>' + (edit ? 'Editar remito' : 'Datos del remito') + '</h2><p class="hint">' + hint + (d.patente_leida ? ' Patente leída: <b>' + esc(d.patente_leida) + '</b>.' : '') + '</p>' + (d.foto ? '<img class="rembig" alt="Foto del remito" src="' + d.foto + '" style="max-height:30vh">' : '') +
     (d.carga_info ? '<p class="note" style="margin:0 0 10px">Despacho vinculado: <b>' + esc(d.carga_info) + '</b></p>' : '') +
     '<form data-form="remito" novalidate><div class="two"><div class="field"><label for="rm-n">Número de remito</label><input class="input mono" id="rm-n" name="numero" autocomplete="off" value="' + esc(d.numero || '') + '"></div><div class="field"><label for="rm-f">Fecha</label><input class="input mono" id="rm-f" name="fecha" type="date" value="' + esc(d.fecha || S.hoy) + '"></div></div>' +
-    '<div class="field"><label for="rm-r">Punto de carga (rodal)</label><select class="input mono" id="rm-r" name="rodal_id"><option value="">Elegir rodal</option>' + rodales().map(function(r){ return '<option value="' + r.id + '"' + (r.id === d.rodal_id ? ' selected' : '') + '>' + esc(r.codigo) + ' · ' + esc(r.contratista) + '</option>'; }).join('') + '</select></div>' +
-    '<div class="field"><label for="rm-d">Destino</label><select class="input" id="rm-d" name="destino_id"><option value="">Sin indicar</option>' + destinos().map(function(x){ return '<option value="' + x.id + '"' + (x.id === d.destino_id ? ' selected' : '') + '>' + esc(x.nombre) + '</option>'; }).join('') + '</select></div>' +
-    fieldNum('rm-t', 'toneladas', 'Toneladas', d.toneladas != null && d.toneladas !== '' ? String(d.toneladas).replace('.', ',') : '', 'Ej.: 27,4') + errHtml() + '<button class="btn primary block" type="submit">' + (edit ? 'Guardar cambios' : 'Guardar remito') + '</button></form>';
+    '<div class="field"><label for="rm-r">Punto de carga (rodal)</label><select class="input mono" id="rm-r" name="rodal_id" data-f="rodal"><option value="">Elegir rodal</option>' + rodales().map(function(r){ return '<option value="' + r.id + '"' + (r.id === d.rodal_id ? ' selected' : '') + '>' + esc(r.codigo) + ' · ' + esc(r.contratista) + '</option>'; }).join('') + '</select></div>' +
+    '<div class="field"><label for="rm-d">Destino</label><select class="input" id="rm-d" name="destino_id" data-f="destino"><option value="">Sin indicar</option>' + destinos().map(function(x){ return '<option value="' + x.id + '"' + (x.id === d.destino_id ? ' selected' : '') + '>' + esc(x.nombre) + '</option>'; }).join('') + '</select></div>' +
+    fieldNum('rm-t', 'toneladas', 'Toneladas', d.toneladas != null && d.toneladas !== '' ? String(d.toneladas).replace('.', ',') : '', 'Ej.: 27,4', 'rtn') + (ui.rol === 'supervisor' ? '' : '<div class="total-bar" id="rimp">' + remitoImporteTxt(d) + '</div>') + errHtml() + '<button class="btn primary block" type="submit">' + (edit ? 'Guardar cambios' : 'Guardar remito') + '</button></form>';
 }
 function sheetRemitoVer(){
   var r = remitoAny(ui.sheet.rid);
@@ -171,18 +171,37 @@ function sheetUsuario(){
     '<div class="field"><span class="lb">Roles habilitados</span><div class="roles">' + ['transportista', 'elaborador', 'supervisor', 'bascula', 'jefe', 'admin'].map(function(r){ return '<label><input type="checkbox" name="roles" value="' + r + '"' + (rolesU.indexOf(r) >= 0 ? ' checked' : '') + '>' + ROLES[r] + '</label>'; }).join('') + '</div></div>' +
     '<div class="field"><label for="us-c">Contratista (para elaboradores)</label><select class="input" id="us-c" name="contratista_id"><option value="">Ninguno</option>' + contratistas().map(function(c){ return '<option value="' + c.id + '"' + (c.id === u.contratista_id ? ' selected' : '') + '>' + esc(c.nombre) + '</option>'; }).join('') + '</select></div>' +
     '<div class="field"><label for="us-p">Nueva contraseña (opcional, 8+)</label><input class="input" id="us-p" name="password" type="password" autocomplete="new-password"></div>' +
-    '<label class="chk"><input type="checkbox" name="activo"' + (u.activo ? ' checked' : '') + '><span>Usuario activo (puede ingresar)</span></label>' + errHtml() + '<button class="btn primary block" type="submit">Guardar</button></form>';
+    '<label class="chk"><input type="checkbox" name="activo"' + (u.activo ? ' checked' : '') + '><span>Usuario activo (puede ingresar)</span></label>' + errHtml() + '<button class="btn primary block" type="submit">' + (u.activo ? 'Guardar usuario' : 'Guardar y aprobar acceso') + '</button></form>';
 }
 function sheetCatalogo(){
   var t = ui.sheet.tipo, lbl = { contratistas: 'contratista', destinos: 'destino', especies: 'especie', largos: 'largo' }[t];
   return '<h2>Nuevo ' + lbl + '</h2><form data-form="catalogo" novalidate>' + (t === 'largos' ? '<div class="field"><label for="ct-p">Largo en pies</label><input class="input mono" id="ct-p" name="pies" inputmode="numeric" autocomplete="off"></div>' : '<div class="field"><label for="ct-n">Nombre</label><input class="input" id="ct-n" name="nombre" autocomplete="off"></div>') +
-    (t === 'destinos' ? '<div class="field"><span class="lb" id="lb-c">Circuito</span><div class="seg" role="radiogroup" aria-labelledby="lb-c"><label><input type="radio" name="circuito" value="industria" checked>Industria propia</label><label><input type="radio" name="circuito" value="ventas">Ventas</label></div></div>' : '') + errHtml() + '<button class="btn primary block" type="submit">Agregar</button></form>';
+    (t === 'destinos' ? '<div class="field"><span class="lb" id="lb-c">Circuito</span><div class="seg" role="radiogroup" aria-labelledby="lb-c"><label><input type="radio" name="circuito" value="industria" checked>Industria propia</label><label><input type="radio" name="circuito" value="ventas">Ventas</label></div></div>' : '') + errHtml() + '<button class="btn primary block" type="submit">Agregar ' + lbl + '</button></form>';
+}
+
+function sheetOutbox(){
+  var ops = API.outbox(), fs = API.fallas(), off = ui.off || navigator.onLine === false;
+  var out = '<h2>Pendientes de enviar</h2><p class="hint">Lo que está acá quedó <b>guardado en este dispositivo</b> pero todavía no está <b>confirmado en el servidor</b>. Se envía solo al recuperar la conexión; no cierres sesión hasta que se vacíe.</p>';
+  out += '<h3 class="sec-h" style="margin-top:4px">Por enviar<span>' + ops.length + '</span></h3>';
+  out += ops.length ? '<div class="rows" style="margin-top:8px">' + ops.map(function(o){ return '<div class="row" style="cursor:default"><span class="t">' + esc(o.desc || o.ruta) + '</span><span class="s"><span>Guardado ' + diaLabel(o.creado_en) + ' ' + hm(o.creado_en) + ' hs</span>' + (o.reintentos ? '<span>' + o.reintentos + ' reintento' + (o.reintentos === 1 ? '' : 's') + '</span>' : '') + (o.foto ? '<span>Incluye foto</span>' : '') + '</span><span class="m"><span class="pill inc-demora" style="font-size:11px;padding:0 6px">Pendiente</span></span></div>'; }).join('') + '</div>' : vacio('Nada pendiente: todo está confirmado en el servidor.', 'margin-top:8px');
+  out += '<h3 class="sec-h">Con error de sincronización<span>' + fs.length + '</span></h3>';
+  out += fs.length ? '<p class="note" style="margin:6px 0 0">El servidor rechazó estas operaciones: no se aplicaron. Revisá el motivo, volvé a hacer la operación con los datos correctos y quitá el aviso.</p><div class="rows" style="margin-top:8px">' + fs.map(function(f){ return '<div class="row" style="cursor:default"><span class="t">' + esc(f.desc) + '</span><span class="s"><span style="color:var(--danger)">' + esc(f.mensaje) + '</span><span>Hecho ' + diaLabel(f.creado_en) + ' ' + hm(f.creado_en) + ' hs · rechazado ' + hm(f.en) + ' hs</span></span><button class="link" data-action="falla-del" data-id="' + f.id + '" style="grid-column:2;grid-row:1/3;color:var(--danger)">Quitar aviso</button></div>'; }).join('') + '</div>' : vacio('Sin errores.', 'margin-top:8px');
+  return out + (ops.length && !off ? '<button class="btn primary block" data-action="actualizar" style="margin-top:12px">Enviar ahora</button>' : '');
+}
+
+function remitoImporteTxt(d){
+  if(ui.rol === 'supervisor') return '';
+  var tn = numSimple(d.toneladas), t = d.rodal_id && d.destino_id ? tarifaLin(d.rodal_id, d.destino_id) : null, c = camion(ui.camionId), tc = tipoCam(c), unit = t ? (tc === '4x2' ? t.tarifa_4x2 : t.tarifa_6x4) : null;
+  if(!d.rodal_id || !d.destino_id) return '<span>Importe estimado</span><span style="color:var(--muted);font-size:13px;font-weight:600">Elegí rodal y destino</span>';
+  if(!unit) return '<span>Importe estimado</span><span style="color:var(--muted);font-size:13px;font-weight:600">Sin tarifa ' + tc + ' para este rodal y destino</span>';
+  if(!isFinite(tn) || tn <= 0) return '<span>Tarifa ' + tc + ' <b style="font-size:16px">' + money(unit) + '</b>/tn</span><span style="color:var(--muted);font-size:13px;font-weight:600">Ingresá las toneladas</span>';
+  return '<span>' + money(unit) + '/tn × ' + f1(tn) + ' tn</span><span><b>' + money(Math.round(unit * tn)) + '</b></span>';
 }
 
 function sheetHtml(){
   if(!ui.sheet) return '';
   var t = ui.sheet.type, body;
-  var map = { pila: sheetPila, programar: sheetProgramar, incidencia: sheetIncidencia, emitir: sheetEmitir, camion: sheetCamion, baja: sheetBaja, solic: sheetSolic, bashor: sheetBasHor, pedido: sheetPedido, rodal: sheetRodal, remito: sheetRemito, remitover: sheetRemitoVer, rodalbaja: sheetRodalBaja, tarifa: sheetTarifa, importar: sheetImportar, inicio: sheetInicio, finalizar: sheetFinalizar, usuario: sheetUsuario, catalogo: sheetCatalogo };
+  var map = { pila: sheetPila, programar: sheetProgramar, incidencia: sheetIncidencia, emitir: sheetEmitir, camion: sheetCamion, baja: sheetBaja, solic: sheetSolic, bashor: sheetBasHor, pedido: sheetPedido, rodal: sheetRodal, remito: sheetRemito, remitover: sheetRemitoVer, rodalbaja: sheetRodalBaja, tarifa: sheetTarifa, importar: sheetImportar, inicio: sheetInicio, finalizar: sheetFinalizar, usuario: sheetUsuario, catalogo: sheetCatalogo, outbox: sheetOutbox };
   try{ body = (map[t] || function(){ return ''; })(); }catch(e){ body = '<h2>Error</h2><p class="note">' + esc(e.message) + '</p>'; }
   return '<div class="overlay" data-action="close-sheet"><div class="sheet" role="dialog" aria-modal="true" aria-label="Formulario"><div class="grab"></div>' + body + '<button class="btn block" data-action="close-sheet" style="margin-top:10px;border-color:transparent;background:transparent;color:var(--muted)">Cancelar</button></div></div>';
 }

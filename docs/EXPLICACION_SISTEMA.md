@@ -264,3 +264,4 @@ Para no arriesgar los datos contables ni romper el sistema de gestión existente
 ## 7. Resumen en Una Sola Frase
 
 > **Este sistema es un semáforo inteligente y una calculadora automática que conecta el hacha en el monte con la balanza en la fábrica, asegurando que nunca falte madera en las máquinas, que ningún camión espere de más en la tierra colorada y que cada flete se pague con el peso exacto.**
+
