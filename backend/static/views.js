@@ -32,7 +32,7 @@ function viewRegistro(){
 }
 function viewPerfil(){
   var u = API.usuario();
-  return '<div class="login">' + brand() + '<p class="lead">Tus datos</p><form data-form="perfil" novalidate>' +
+  return '<div class="login">' + brand() + '<button class="backlink" data-action="cancelar-perfil">← Volver</button><p class="lead">Tus datos</p><form data-form="perfil" novalidate>' +
     '<div class="field"><label for="pf-n">Nombre y apellido</label><input class="input" id="pf-n" name="nombre" value="' + esc(u.nombre) + '"></div>' +
     '<div class="field"><label for="pf-e">Empresa</label><input class="input" id="pf-e" name="empresa" value="' + esc(u.empresa) + '"></div>' +
     '<div class="field"><span class="lb" id="lb-pf">Puesto</span><div class="seg" role="radiogroup" aria-labelledby="lb-pf" style="flex-wrap:wrap">' + PUESTOS.map(function(x){ return '<label><input type="radio" name="puesto" value="' + esc(x) + '"' + (u.puesto === x ? ' checked' : '') + '>' + esc(x) + '</label>'; }).join('') + '</div></div>' +
@@ -70,7 +70,7 @@ function viewRol(){
 }
 function viewAlta(c){
   var rech = c.alta_estado === 'rechazada';
-  return '<div style="padding-bottom:30px">' + brand() + '<p class="lead">' + (rech ? 'Tu alta fue rechazada' : 'Alta pendiente de aprobación') + '</p>' +
+  return '<div style="padding-bottom:30px">' + brand() + '<button class="backlink" data-action="cambiar-rol">← Volver</button><p class="lead">' + (rech ? 'Tu alta fue rechazada' : 'Alta pendiente de aprobación') + '</p>' +
     '<article class="truck"><div class="truck-top"><span class="plate">' + esc(c.patente) + '</span><span class="pill ' + (rech ? 'inc-mecanico' : 'inc-demora') + '">' + (rech ? 'Rechazada' : 'Pendiente') + '</span></div>' +
     '<div><div class="who">' + esc(c.chofer) + '</div><div class="meta"><span>' + esc(c.empresa) + '</span><span>Capacidad <b>' + c.capacidad_tn + ' tn</b></span><span>Enviada ' + hm(c.alta_en) + '</span></div></div></article>' +
     '<p class="note" style="margin-top:12px">' + (rech ? 'El supervisor no aceptó el alta. Revisá los datos con él y volvé a cargarla.' : 'El supervisor tiene que aceptar tu alta para que puedas ver tu programa de carga. Volvé a abrir la app en unos minutos.') + '</p>' +
@@ -106,7 +106,26 @@ function header(){
   else if(t === 'viaje'){ var cv = camion(ui.camionId); title = 'Mi viaje'; sub = esc(cv ? cv.patente + ' · ' + cv.chofer : ''); }
   else if(t === 'usuarios'){ title = 'Usuarios'; sub = '<b>' + ((ui.usuarios || []).filter(function(u){ return !u.activo; }).length) + '</b> pendientes de aprobación'; }
   else if(t === 'catalogos'){ title = 'Catálogos'; sub = 'Contratistas, destinos, especies y largos'; }
-  return '<header class="top"><div style="min-width:0"><h1>' + title + '</h1><p class="sub">' + sub + '</p></div>' + (ro ? '' : act) + '</header>';
+
+  var defT = defaultTab(r);
+  var backBtn = '';
+  if(t !== defT){
+    backBtn = '<button class="backlink-hdr" data-action="nav-back" title="Volver a la vista principal">← Volver</button>';
+  } else if(r === 'transportista' && ui.camionId){
+    backBtn = '<button class="backlink-hdr" data-action="cambiar-camion" title="Elegir otro camión">← Camiones</button>';
+  } else if(r === 'elaborador' && (esJefePuesto() || (contratistas().length > 1))){
+    backBtn = '<button class="backlink-hdr" data-action="cambiar-contr" title="Elegir otro contratista">← Contratistas</button>';
+  } else {
+    backBtn = '<button class="backlink-hdr" data-action="cambiar-rol" title="Volver a selección de roles">← Roles</button>';
+  }
+
+  return '<header class="top">' +
+    '<div class="hdr-title-group">' +
+      backBtn +
+      '<div style="min-width:0"><h1>' + title + '</h1><p class="sub">' + sub + '</p></div>' +
+    '</div>' +
+    (ro ? '' : act) +
+  '</header>';
 }
 function connChip(){
   var off = ui.off || navigator.onLine === false, n = API.pendientes(), f = API.fallas().length;
@@ -151,6 +170,8 @@ function roleBar(){
     '<div class="bar-actions">' +
     '<button class="rolbtn icon-only" data-action="toggle-theme" title="' + titleTema + '" aria-label="' + titleTema + '">' + iconTema + '</button>' +
     '<button class="rolbtn" data-action="actualizar" aria-label="Actualizar datos">' + (ui.cargando ? '<span class="spinner"></span>' : '<svg class="ico-refresh" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>') + ' Actualizar · ' + esc(ui.updAt || '--:--') + '</button>' +
+    (ui.rol === 'transportista' && ui.camionId ? '<button class="rolbtn" data-action="cambiar-camion" title="Elegir otro camión">🚚 Cambiar camión</button>' : '') +
+    (ui.rol === 'elaborador' && (esJefePuesto() || (contratistas().length > 1)) ? '<button class="rolbtn" data-action="cambiar-contr" title="Elegir otro contratista">🌲 Cambiar contratista</button>' : '') +
     '<button class="rolbtn" data-action="cambiar-rol"><b>' + who + '</b> · cambiar rol</button>' +
     '</div></div>';
 }

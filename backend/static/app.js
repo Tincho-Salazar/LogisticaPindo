@@ -177,6 +177,59 @@
     if(a === 'rol-back'){ ui.step = null; ui.rol = null; S = null; savePref(); render(); return; }
     if(a === 'rol-camion'){ ui.camionId = id; entrar('transportista'); return; }
     if(a === 'rol-contr'){ ui.contrId = id; entrar('elaborador'); return; }
+    if(a === 'nav-back'){
+      if(ui.sheet){ closeSheet(); return; }
+      if(ui.tab && ui.tab !== defaultTab(ui.rol)){
+        ui.tab = defaultTab(ui.rol);
+        window.scrollTo(0, 0);
+        render();
+        return;
+      }
+      if(ui.rol === 'transportista' && ui.camionId){
+        ui.step = 'transportista';
+        ui.camionId = null;
+        ui.tab = null;
+        savePref();
+        window.scrollTo(0, 0);
+        render();
+        return;
+      }
+      if(ui.rol === 'elaborador' && ui.contrId && (esJefePuesto() || (contratistas && contratistas().length > 1))){
+        ui.step = 'elaborador';
+        ui.contrId = null;
+        ui.tab = null;
+        savePref();
+        window.scrollTo(0, 0);
+        render();
+        return;
+      }
+      ui.rol = null;
+      ui.step = null;
+      ui.sheet = null;
+      S = null;
+      savePref();
+      window.scrollTo(0, 0);
+      render();
+      return;
+    }
+    if(a === 'cambiar-camion'){
+      ui.step = 'transportista';
+      ui.camionId = null;
+      ui.tab = null;
+      savePref();
+      window.scrollTo(0, 0);
+      render();
+      return;
+    }
+    if(a === 'cambiar-contr'){
+      ui.step = 'elaborador';
+      ui.contrId = null;
+      ui.tab = null;
+      savePref();
+      window.scrollTo(0, 0);
+      render();
+      return;
+    }
     if(a === 'cambiar-rol'){ ui.rol = null; ui.step = null; ui.sheet = null; S = null; savePref(); window.scrollTo(0, 0); render(); return; }
     if(a === 'tab'){ ui.tab = v; window.scrollTo(0, 0); render(); if(v === 'analisis') cargarAnalisis(true); if(v === 'usuarios' && !ui.usuarios) cargarUsuarios(); return; }
     if(a === 'actualizar'){ cargarEstado(true); if(ui.rol === 'admin') cargarUsuarios(); enviarPendientes(); return; }

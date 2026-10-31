@@ -203,5 +203,10 @@ function sheetHtml(){
   var t = ui.sheet.type, body;
   var map = { pila: sheetPila, programar: sheetProgramar, incidencia: sheetIncidencia, emitir: sheetEmitir, camion: sheetCamion, baja: sheetBaja, solic: sheetSolic, bashor: sheetBasHor, pedido: sheetPedido, rodal: sheetRodal, remito: sheetRemito, remitover: sheetRemitoVer, rodalbaja: sheetRodalBaja, tarifa: sheetTarifa, importar: sheetImportar, inicio: sheetInicio, finalizar: sheetFinalizar, usuario: sheetUsuario, catalogo: sheetCatalogo, outbox: sheetOutbox };
   try{ body = (map[t] || function(){ return ''; })(); }catch(e){ body = '<h2>Error</h2><p class="note">' + esc(e.message) + '</p>'; }
-  return '<div class="overlay" data-action="close-sheet"><div class="sheet" role="dialog" aria-modal="true" aria-label="Formulario"><div class="grab"></div>' + body + '<button class="btn block" data-action="close-sheet" style="margin-top:10px;border-color:transparent;background:transparent;color:var(--muted)">Cancelar</button></div></div>';
+  return '<div class="overlay" data-action="close-sheet"><div class="sheet" role="dialog" aria-modal="true" aria-label="Formulario">' +
+    '<div class="sheet-hdr-bar"><button type="button" class="sheet-close-btn" data-action="close-sheet" aria-label="Cerrar formulario y volver">✕ Cerrar</button></div>' +
+    '<div class="grab"></div>' +
+    body +
+    '<button class="btn block" data-action="close-sheet" style="margin-top:10px;border-color:transparent;background:transparent;color:var(--muted)">Cancelar y volver</button>' +
+  '</div></div>';
 }
