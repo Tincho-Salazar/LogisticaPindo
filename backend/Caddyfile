@@ -1,0 +1,25 @@
+# Caddyfile de producción · Logística Forestal Pindó SA
+# Dominio público con TLS automático (Let's Encrypt) y proxy inverso hacia FastAPI/Uvicorn.
+
+correo.pindosa.com.ar {
+    encode zstd gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "no-referrer"
+        -Server
+    }
+
+    request_body {
+        max_size 16MB
+    }
+
+    reverse_proxy 127.0.0.1:8000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
+
