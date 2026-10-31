@@ -9,11 +9,11 @@ import socket
 import sys
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
 VENV_PY = BASE_DIR / ".venv" / "Scripts" / "python.exe"
 
 # Si se ejecuta con el Python global fuera del .venv, delega automáticamente en el .venv local
-if VENV_PY.exists() and Path(sys.executable).resolve() != VENV_PY.resolve():
+if not getattr(sys, "frozen", False) and VENV_PY.exists() and Path(sys.executable).resolve() != VENV_PY.resolve():
     import subprocess
     raise SystemExit(subprocess.call([str(VENV_PY), str(Path(__file__).resolve()), *sys.argv[1:]]))
 
@@ -22,6 +22,7 @@ sys.path.insert(0, str(BASE_DIR))
 
 import uvicorn  # noqa: E402
 from app import config  # noqa: E402
+from app.main import app  # noqa: E402
 
 
 def _ips_locales() -> list[str]:
@@ -100,7 +101,7 @@ def main():
     print("=" * 64)
 
     uvicorn.run(
-        "app.main:app",
+        app,
         host=host,
         port=port,
         proxy_headers=True,

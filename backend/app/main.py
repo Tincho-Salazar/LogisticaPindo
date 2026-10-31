@@ -1,5 +1,6 @@
 """Logística Forestal Pindó SA · API FastAPI + app móvil (PWA) servida como estáticos."""
 import logging
+import sys
 from pathlib import Path
 
 import pyodbc
@@ -15,7 +16,16 @@ log = logging.getLogger("logistica")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
 app = FastAPI(title="Logística Forestal Pindó SA", version="1.0.0", docs_url="/api/docs" if config.APP_ENV != "prod" else None, redoc_url=None)
-STATIC = Path(__file__).resolve().parent.parent / "static"
+
+if getattr(sys, "frozen", False):
+    if (Path(sys.executable).resolve().parent / "static").exists():
+        STATIC = Path(sys.executable).resolve().parent / "static"
+    elif hasattr(sys, "_MEIPASS") and (Path(sys._MEIPASS) / "static").exists():
+        STATIC = Path(sys._MEIPASS) / "static"
+    else:
+        STATIC = Path(__file__).resolve().parent.parent / "static"
+else:
+    STATIC = Path(__file__).resolve().parent.parent / "static"
 
 
 @app.exception_handler(ApiError)

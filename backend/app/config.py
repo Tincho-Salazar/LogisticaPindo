@@ -1,11 +1,21 @@
 """Configuración desde variables de entorno (.env)."""
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / os.getenv("LF_ENV", ".env"))  # LF_ENV=.env.prod para apuntar a producción sin tocar .env
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys.executable).resolve().parent
+    env_file = BASE_DIR / os.getenv("LF_ENV", ".env")
+    if not env_file.exists() and hasattr(sys, "_MEIPASS"):
+        meipass_env = Path(sys._MEIPASS) / os.getenv("LF_ENV", ".env")
+        if meipass_env.exists():
+            env_file = meipass_env
+    load_dotenv(env_file)
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    load_dotenv(BASE_DIR / os.getenv("LF_ENV", ".env"))  # LF_ENV=.env.prod para apuntar a producción sin tocar .env
 
 
 def _b(k, d="false"):

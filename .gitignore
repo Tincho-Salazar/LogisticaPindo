@@ -36,6 +36,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# PyInstaller build outputs
+backend/build/
+backend/dist/
+build/
+dist/
+
 # Sistema operativo y editores
 .DS_Store
 Thumbs.db
