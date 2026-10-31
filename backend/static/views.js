@@ -102,8 +102,33 @@ function header(){
 }
 function connChip(){
   var off = ui.off || navigator.onLine === false, n = API.pendientes();
-  var txt = off ? 'Sin conexión · datos guardados' + (n ? ' · ' + n + ' sin enviar' : '') : (n ? n + ' cambio' + (n === 1 ? '' : 's') + ' por enviar' : 'En línea');
-  return '<span class="conn' + (off || n ? ' off' : '') + '" role="status">' + txt + '</span>';
+  var txt = off ? 'Sin conexión · Guardado en este dispositivo' + (n ? ' · ' + n + ' pendiente' + (n === 1 ? '' : 's') + ' sin enviar' : '') : (n ? n + ' pendiente' + (n === 1 ? '' : 's') + ' sin enviar · sincronizando…' : 'En línea · Confirmado en servidor');
+  return '<span class="conn' + (off ? ' off' : n ? ' sync' : ' ok') + '" role="status">' + txt + '</span>';
+}
+function flujoSupervisorBar(){
+  var ac = activos(), progHoy = programa().filter(function(g){ return g.jornada === S.hoy; });
+  var nProg = progHoy.filter(function(g){ return g.estado === 'programado' && (!camion(g.camion_id) || camion(g.camion_id).estado === 'disponible'); }).length;
+  var nFila = ac.filter(function(c){ return c.estado === 'fila'; }).length;
+  var nCarga = ac.filter(function(c){ return c.estado === 'cargando'; }).length;
+  var nRuta = ac.filter(function(c){ return c.estado === 'ruta'; }).length;
+  var nBasc = (cargas().filter(function(k){ return k.jornada === S.hoy && k.ingreso_en; })).length;
+  var novs = ac.filter(function(c){ return c.inc; }).length;
+
+  return '<section class="op-stream" aria-label="Flujo operativo en tiempo real">' +
+    '<div class="op-stream-h"><b>Flujo operativo de hoy</b><span>' + progHoy.length + ' camiones programados</span></div>' +
+    '<div class="op-stream-flow">' +
+      '<div class="op-step"><span class="op-val">' + nProg + '</span><span class="op-lbl">Programados</span></div>' +
+      '<div class="op-arrow">→</div>' +
+      '<div class="op-step"><span class="op-val' + (nFila ? ' warn' : '') + '">' + nFila + '</span><span class="op-lbl">En espera</span></div>' +
+      '<div class="op-arrow">→</div>' +
+      '<div class="op-step"><span class="op-val' + (nCarga ? ' busy' : '') + '">' + nCarga + '</span><span class="op-lbl">Cargando</span></div>' +
+      '<div class="op-arrow">→</div>' +
+      '<div class="op-step"><span class="op-val' + (nRuta ? ' info' : '') + '">' + nRuta + '</span><span class="op-lbl">En viaje</span></div>' +
+      '<div class="op-arrow">→</div>' +
+      '<div class="op-step"><span class="op-val ok">' + nBasc + '</span><span class="op-lbl">En planta</span></div>' +
+    '</div>' +
+    (novs ? '<div class="op-alert"><span class="pill inc-mecanico">Novedades</span> <b>' + novs + '</b> camión' + (novs === 1 ? '' : 'es') + ' con falla mecánica o demora reportada.</div>' : '') +
+  '</section>';
 }
 function roleBar(){
   var u = API.usuario();
@@ -136,7 +161,7 @@ function cierreHtml(cids){
 function viewStock(){
   var el = ui.rol === 'elaborador', base = pilas(), ids = el ? [S.contratista_id] : contratistas().map(function(c){ return c.id; });
   var fino = sum(base.filter(function(p){ return p.tipo === 'fino'; }), function(p){ return p.volumen_m3; }), grueso = sum(base.filter(function(p){ return p.tipo === 'grueso'; }), function(p){ return p.volumen_m3; }), vt = sum(base.filter(esVentas), function(p){ return p.volumen_m3; });
-  var out = cierreHtml(ids) + '<section class="summary"><div class="big"><span class="n">' + f1(fino + grueso) + '</span><span class="u">m³</span><span class="l">' + (el ? 'Pendiente de carga en tus pilas, según tu último relevamiento' : 'Pendiente de carga en pila, según último relevamiento de cada contratista') + '</span></div>' + splitBar(fino, grueso) +
+  var out = (ui.rol === 'supervisor' ? flujoSupervisorBar() : '') + cierreHtml(ids) + '<section class="summary"><div class="big"><span class="n">' + f1(fino + grueso) + '</span><span class="u">m³</span><span class="l">' + (el ? 'Pendiente de carga en tus pilas, según tu último relevamiento' : 'Pendiente de carga en pila, según último relevamiento de cada contratista') + '</span></div>' + splitBar(fino, grueso) +
     '<div class="legend" style="margin-top:10px"><span>Stock Pindó SA <b>' + f1(fino + grueso - vt) + ' m³</b></span><span>Stock de ventas <b>' + f1(vt) + ' m³</b></span></div></section>';
   if(!el) out += '<button class="btn block" data-action="reporte" style="margin-top:12px">Generar reporte en PDF</button>';
   if(el && relCerrado()) out += '<div class="incbox inc-demora" style="margin-top:12px"><b>Relevamiento cerrado</b> · Cerró a las ' + S.cierres.relevamiento + ' hs. Mañana podés volver a relevar.</div>';
@@ -194,9 +219,9 @@ function viewCamiones(){
   Object.keys(ESTADOS).forEach(function(k){ counts[k] = activos().filter(function(c){ return c.estado === k; }).length; });
   var chips = [['todos', 'Todos']].concat(Object.keys(ESTADOS).map(function(k){ return [k, ESTADOS_CHIP[k]]; })).concat([['novedad', 'Novedades']]);
   var ap = altasPend();
-  var out = ap.length ? '<section class="group"><div class="group-h"><h2>Altas pendientes</h2><span>' + ap.length + '</span></div><div class="list" style="margin-top:0">' + ap.map(function(c){
+  var out = flujoSupervisorBar() + (ap.length ? '<section class="group"><div class="group-h"><h2>Altas pendientes</h2><span>' + ap.length + '</span></div><div class="list" style="margin-top:0">' + ap.map(function(c){
     return '<article class="truck"><div class="truck-top"><span class="plate">' + esc(c.patente) + '</span><span class="pill inc-demora">Pendiente</span></div><div><div class="who">' + esc(c.chofer) + '</div><div class="meta"><span>' + esc(c.empresa) + '</span><span>Capacidad <b>' + c.capacidad_tn + ' tn</b> · ' + c.traccion + '</span>' + (c.telefono ? '<span>Tel. <b>' + esc(c.telefono) + '</b></span>' : '') + '<span>Solicitada ' + diaLabel(c.alta_en) + ' ' + hm(c.alta_en) + '</span></div></div>' +
-      '<div class="acts"><button class="btn primary" data-action="alta-ok" data-id="' + c.id + '">Aceptar</button><button class="btn warn" data-action="alta-no" data-id="' + c.id + '">Rechazar</button></div></article>'; }).join('') + '</div></section>' : '';
+      '<div class="acts"><button class="btn primary" data-action="alta-ok" data-id="' + c.id + '">Aceptar</button><button class="btn warn" data-action="alta-no" data-id="' + c.id + '">Rechazar</button></div></article>'; }).join('') + '</div></section>' : '');
   out += dispResumenHtml() + '<div class="chips" role="group" aria-label="Filtrar por estado">' + chips.map(function(x){ return '<button class="chip" data-action="festado" data-v="' + x[0] + '" aria-pressed="' + (ui.festado === x[0]) + '">' + x[1] + '<span class="c">' + counts[x[0]] + '</span></button>'; }).join('') + '</div>';
   var list = activos().filter(function(c){ return ui.festado === 'todos' || (ui.festado === 'novedad' ? !!c.inc : c.estado === ui.festado); });
   if(!list.length) return out + vacio('No hay camiones en este estado.');
