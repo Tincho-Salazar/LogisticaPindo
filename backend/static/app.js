@@ -242,6 +242,7 @@
     if(a === 'toggle-carga'){ ui.open[id] = !ui.open[id]; render(); return; }
     if(a === 'outbox'){ openSheet({ type: 'outbox' }); return; }
     if(a === 'falla-del'){ API.quitarFalla(id); render(); return; }
+    if(a === 'ayuda'){ openSheet({ type: 'ayuda' }); return; }
     if(soloLectura()){ toast('Vista de solo lectura', true); return; }
     var c = camion(cid());
     if(a === 'dispm'){ if(!dispAbierta()) return; accion('PUT', '/camiones/' + cid() + '/disponibilidad-manana', { valor: v }, { desc: 'disponibilidad', optimista: function(){ c.disp_manana = { valor: v, respondida_en: isoLocal() }; } }).catch(function(e){ toast(errorTexto(e), true); }); }

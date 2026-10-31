@@ -119,12 +119,17 @@ function header(){
     backBtn = '<button class="backlink-hdr" data-action="cambiar-rol" title="Volver a selección de roles">← Roles</button>';
   }
 
+  var helpBtn = '<button type="button" class="btn-help-hdr" data-action="ayuda" title="Guía y ayuda de tu rol">❓ Ayuda</button>';
+
   return '<header class="top">' +
     '<div class="hdr-title-group">' +
       backBtn +
       '<div style="min-width:0"><h1>' + title + '</h1><p class="sub">' + sub + '</p></div>' +
     '</div>' +
-    (ro ? '' : act) +
+    '<div class="hdr-actions">' +
+      helpBtn +
+      (ro ? '' : act) +
+    '</div>' +
   '</header>';
 }
 function connChip(){
@@ -168,6 +173,7 @@ function roleBar(){
   return '<div class="bar-pindo-strip" aria-hidden="true"></div>' +
     '<div class="bar">' + (S && S.modo_prueba ? '<span class="demo">Modo de prueba</span>' : '') + connChip() +
     '<div class="bar-actions">' +
+    '<button class="rolbtn" data-action="ayuda" title="Guía y ayuda de tu rol">❓ Ayuda</button>' +
     '<button class="rolbtn icon-only" data-action="toggle-theme" title="' + titleTema + '" aria-label="' + titleTema + '">' + iconTema + '</button>' +
     '<button class="rolbtn" data-action="actualizar" aria-label="Actualizar datos">' + (ui.cargando ? '<span class="spinner"></span>' : '<svg class="ico-refresh" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>') + ' Actualizar · ' + esc(ui.updAt || '--:--') + '</button>' +
     (ui.rol === 'transportista' && ui.camionId ? '<button class="rolbtn" data-action="cambiar-camion" title="Elegir otro camión">🚚 Cambiar camión</button>' : '') +

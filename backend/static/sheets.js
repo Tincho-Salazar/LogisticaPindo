@@ -198,10 +198,125 @@ function remitoImporteTxt(d){
   return '<span>' + money(unit) + '/tn × ' + f1(tn) + ' tn</span><span><b>' + money(Math.round(unit * tn)) + '</b></span>';
 }
 
+function sheetAyuda(){
+  var r = ui.rol, t = ui.tab;
+  var out = '';
+  if(r === 'transportista'){
+    out = '<h2>🚚 Guía para el Chofer (Transportista)</h2>' +
+      '<p class="hint">Acá tenés todo lo que necesitás saber para manejar tu camión en el sistema, en palabras simples.</p>' +
+      '<div class="help-box" style="display:flex;flex-direction:column;gap:8px;margin-top:10px">' +
+        '<details class="acc" open><summary><span>1. Tu viaje del día (Paso a paso)</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0"><b>• Ver viaje:</b> En la pestaña <i>Mi viaje</i> mirás qué contratista te carga, a qué hora tenés que estar y adónde va la madera.<br>' +
+          '<b>• Al llegar al monte:</b> Tocás el botón verde <b>"Entrar en fila"</b>. Esto le avisa al cargador que ya estás listo para tu turno.<br>' +
+          '<b>• Durante la carga:</b> El cargador te llama y empieza a subir los rollos. Tu estado pasa solo a <i>Cargando rollos</i>.<br>' +
+          '<b>• Salida a ruta:</b> Cuando terminan de cargar, salís hacia la balanza de planta o el cliente.<br>' +
+          '<b>• Al descargar:</b> Cuando el camión queda vacío en planta, tocás <b>"Avisar descarga completa"</b> para quedar disponible de nuevo.</p>' +
+        '</div></details>' +
+        '<details class="acc" open><summary><span>2. Si se rompió algo o te demorás</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0"><b>• Problema mecánico:</b> Tocás <i>Avisar problema mecánico</i> y elegís el motivo (goma pinchada, frenos, motor). El supervisor no te manda viajes hasta que toques <i>Camión reparado</i>.<br>' +
+          '<b>• Demora:</b> Tocás <i>Avisar demora</i> y ponés cuántos minutos calculás de retraso (ej. camino pesado por lluvia o corte de ruta).</p>' +
+        '</div></details>' +
+        '<details class="acc" open><summary><span>3. Cargar remitos y cobrar fletes</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0"><b>• Cargar remito:</b> Entrás en la pestaña <b>Mis fletes</b> y tocás <b>"+ Cargar remito"</b>.<br>' +
+          '<b>• Sacar foto:</b> Podés sacarle una foto directa al papel del remito con la cámara del celular o cargar los datos a mano.<br>' +
+          '<b>• Cuánto vas a cobrar:</b> El sistema calcula solo el importe según las toneladas pesadas y tu tipo de camión (4x2 o 6x4). Podés ver el total acumulado del mes.</p>' +
+        '</div></details>' +
+        '<details class="acc"><summary><span>4. Confirmar viaje de mañana</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">Todos los días antes de las <b>20:00 hs</b> te aparece una pregunta en pantalla: <i>¿Disponible para mañana?</i> Tocás <b>Sí</b> o <b>No</b> para que te reserven viajes.</p>' +
+        '</div></details>' +
+        '<details class="acc"><summary><span>5. ¿Qué pasa si no hay señal en el monte?</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0"><b>Usás la app igual:</b> La aplicación guarda tus avisos y fotos en el celular sin internet. Apenas volvés a agarrar señal en la ruta o pueblo, se manda todo solo a la empresa.</p>' +
+        '</div></details>' +
+      '</div>';
+  } else if(r === 'elaborador'){
+    out = '<h2>🌲 Guía para el Elaborador (Cosecha en Monte)</h2>' +
+      '<p class="hint">Cómo registrar tu madera cortada en el monte y despachar los camiones que llegan.</p>' +
+      '<div class="help-box" style="display:flex;flex-direction:column;gap:8px;margin-top:10px">' +
+        '<details class="acc" open><summary><span>1. Cargar el stock de tus pilas</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0"><b>• Relevar pilas:</b> En la pestaña <b>Mi stock</b> tocás <b>"+ Relevar"</b>.<br>' +
+          '<b>• Datos de la pila:</b> Elegís especie (pino o eucalipto), clasificación (fino o grueso), largo en pies (10\', 12\', 14\', etc.) y los metros cúbicos (m³) que mediste en la pila.<br>' +
+          '<b>• Horario de cierre:</b> El relevamiento diario cierra a las <b>21:00 hs</b>.</p>' +
+        '</div></details>' +
+        '<details class="acc" open><summary><span>2. Cola de camiones y despacho</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0"><b>• Ver la fila:</b> En <b>Cola de carga</b> ves los camiones que tocaron que llegaron al monte y cuánto llevan esperando.<br>' +
+          '<b>• Iniciar carga:</b> Cuando la máquina cargadora arranca a subir madera, tocás <b>"Iniciar carga"</b>.<br>' +
+          '<b>• Finalizar carga:</b> Cuando el camión está listo para salir, tocás <b>"Finalizar carga"</b> y ponés de qué pilas sacaste los rollos. El sistema descuenta esos m³ de tu stock automáticamente.</p>' +
+        '</div></details>' +
+        '<details class="acc"><summary><span>3. Pedido de rollos</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">En la pestaña <b>Pedido</b> consultás qué tipo de madera necesita Pindó que cortes y elabores para mañana.</p>' +
+        '</div></details>' +
+        '<details class="acc"><summary><span>4. Trabajo sin señal en el monte</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">Podés medir pilas y despachar camiones aunque no tengas internet en el lote. Los datos se guardan en el teléfono y se envían automáticamente apenas haya señal.</p>' +
+        '</div></details>' +
+      '</div>';
+  } else if(r === 'bascula'){
+    out = '<h2>⚖️ Guía para el Operador de Báscula</h2>' +
+      '<p class="hint">Registro de entradas, salidas y control de tiempos en la balanza de planta.</p>' +
+      '<div class="help-box" style="display:flex;flex-direction:column;gap:8px;margin-top:10px">' +
+        '<details class="acc" open><summary><span>1. Camiones en camino</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">En la pestaña <b>Báscula</b> ves qué camiones ya salieron cargados de los montes y a qué hora calculan llegar a la planta (ETA).</p>' +
+        '</div></details>' +
+        '<details class="acc" open><summary><span>2. Registrar Ingreso (Peso Bruto)</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">Cuando el camión sube a la balanza, tocás el botón verde <b>"Ingreso"</b>. El camión pasa a estado <i>En descarga</i> y se dirige a la playa de rollos.</p>' +
+        '</div></details>' +
+        '<details class="acc" open><summary><span>3. Registrar Salida (Tara)</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">Cuando el camión fue vaciado y vuelve a pasar por la balanza, tocás <b>"Salida"</b>. El sistema calcula los minutos que demoró en descargar y registra la permanencia.</p>' +
+        '</div></details>' +
+        '<details class="acc"><summary><span>4. Cargas a Industria y Horarios</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">En <b>Industria</b> ves los viajes internos para aserradero y biomasa. En <b>Horarios</b> tenés el registro minuto a minuto del día.</p>' +
+        '</div></details>' +
+      '</div>';
+  } else if(r === 'supervisor'){
+    out = '<h2>📋 Guía para el Supervisor de Operaciones</h2>' +
+      '<p class="hint">Control de la operación en tiempo real, seguimiento de flota y armado del programa diario.</p>' +
+      '<div class="help-box" style="display:flex;flex-direction:column;gap:8px;margin-top:10px">' +
+        '<details class="acc" open><summary><span>1. Barra de Flujo en Vivo</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">Arriba de la pantalla ves la barra con camiones <i>Programados → En espera → Cargando → En viaje → En planta</i>. Las pastillas rojas te avisan si hay camiones rotos o demorados.</p>' +
+        '</div></details>' +
+        '<details class="acc" open><summary><span>2. Armar el Programa de Mañana</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0"><b>• Pestaña Programa:</b> Elegís <b>Mañana</b> y tocás <b>"+ Programar"</b>.<br>' +
+          '<b>• Asignación:</b> Tildás camiones para cada contratista escalonando los horarios de llegada.<br>' +
+          '<b>• Emisión:</b> Cuando los contratistas cargaron su stock (21:00 hs), tocás <b>"Emitir programa"</b> para que cada chofer vea su viaje en el celular.</p>' +
+        '</div></details>' +
+        '<details class="acc"><summary><span>3. Camiones y Altas</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">En <b>Camiones</b> aprobás choferes nuevos y monitoreás quiénes confirmaron que están disponibles.</p>' +
+        '</div></details>' +
+        '<details class="acc"><summary><span>4. Análisis de tiempos de ciclo</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">En <b>Análisis</b> revisás cuánto tarda cada transporte en cargar, viajar, descargar y volver al monte.</p>' +
+        '</div></details>' +
+      '</div>';
+  } else if(r === 'jefe'){
+    out = '<h2>💵 Guía para el Jefe de Logística / Tarifas</h2>' +
+      '<p class="hint">Administración de precios de flete, distancias y liquidaciones.</p>' +
+      '<div class="help-box" style="display:flex;flex-direction:column;gap:8px;margin-top:10px">' +
+        '<details class="acc" open><summary><span>1. Tarifario por Rodal y Destino</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">En la pestaña <b>Tarifas</b> podés editar los kilómetros de asfalto, tierra y los precios por tonelada diferenciados para tracción 4x2 y 6x4.</p>' +
+        '</div></details>' +
+        '<details class="acc" open><summary><span>2. Importación desde Excel</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">Tocás <b>"Importar tarifas"</b> para subir planillas masivas de Excel (.xlsx) con vista previa de cambios antes de confirmar.</p>' +
+        '</div></details>' +
+      '</div>';
+  } else if(r === 'admin'){
+    out = '<h2>👥 Guía para el Administrador</h2>' +
+      '<p class="hint">Gestión de accesos, roles de usuario y catálogos maestros.</p>' +
+      '<div class="help-box" style="display:flex;flex-direction:column;gap:8px;margin-top:10px">' +
+        '<details class="acc" open><summary><span>1. Aprobación de Usuarios</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">En <b>Usuarios</b> ves solicitudes de registro nuevas. Asignás los roles correspondientes (transportista, elaborador, supervisor, etc.) y activás la cuenta.</p>' +
+        '</div></details>' +
+        '<details class="acc" open><summary><span>2. Catálogos</span></summary><div class="acc-b">' +
+          '<p style="margin:4px 0">En <b>Catálogos</b> creás o modificás contratistas, destinos de entrega, especies de rollos y largos en pies.</p>' +
+        '</div></details>' +
+      '</div>';
+  } else {
+    out = '<h2>❓ Ayuda del Sistema</h2><p class="hint">Elegí tu rol en la pantalla principal para ver la guía específica de tus tareas.</p>';
+  }
+  return out + '<button type="button" class="btn primary block" data-action="close-sheet" style="margin-top:16px">Entendido</button>';
+}
+
 function sheetHtml(){
   if(!ui.sheet) return '';
   var t = ui.sheet.type, body;
-  var map = { pila: sheetPila, programar: sheetProgramar, incidencia: sheetIncidencia, emitir: sheetEmitir, camion: sheetCamion, baja: sheetBaja, solic: sheetSolic, bashor: sheetBasHor, pedido: sheetPedido, rodal: sheetRodal, remito: sheetRemito, remitover: sheetRemitoVer, rodalbaja: sheetRodalBaja, tarifa: sheetTarifa, importar: sheetImportar, inicio: sheetInicio, finalizar: sheetFinalizar, usuario: sheetUsuario, catalogo: sheetCatalogo, outbox: sheetOutbox };
+  var map = { pila: sheetPila, programar: sheetProgramar, incidencia: sheetIncidencia, emitir: sheetEmitir, camion: sheetCamion, baja: sheetBaja, solic: sheetSolic, bashor: sheetBasHor, pedido: sheetPedido, rodal: sheetRodal, remito: sheetRemito, remitover: sheetRemitoVer, rodalbaja: sheetRodalBaja, tarifa: sheetTarifa, importar: sheetImportar, inicio: sheetInicio, finalizar: sheetFinalizar, usuario: sheetUsuario, catalogo: sheetCatalogo, outbox: sheetOutbox, ayuda: sheetAyuda };
   try{ body = (map[t] || function(){ return ''; })(); }catch(e){ body = '<h2>Error</h2><p class="note">' + esc(e.message) + '</p>'; }
   return '<div class="overlay" data-action="close-sheet"><div class="sheet" role="dialog" aria-modal="true" aria-label="Formulario">' +
     '<div class="sheet-hdr-bar"><button type="button" class="sheet-close-btn" data-action="close-sheet" aria-label="Cerrar formulario y volver">✕ Cerrar</button></div>' +
