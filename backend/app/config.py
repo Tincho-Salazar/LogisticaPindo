@@ -6,13 +6,21 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 if getattr(sys, "frozen", False):
-    BASE_DIR = Path(sys.executable).resolve().parent
-    env_file = BASE_DIR / os.getenv("LF_ENV", ".env")
-    if not env_file.exists() and hasattr(sys, "_MEIPASS"):
-        meipass_env = Path(sys._MEIPASS) / os.getenv("LF_ENV", ".env")
-        if meipass_env.exists():
-            env_file = meipass_env
-    load_dotenv(env_file)
+    EXE_DIR = Path(sys.executable).resolve().parent
+    cands = [
+        EXE_DIR / os.getenv("LF_ENV", ".env"),
+        EXE_DIR.parent / os.getenv("LF_ENV", ".env"),
+        EXE_DIR.parent.parent / os.getenv("LF_ENV", ".env"),
+    ]
+    if hasattr(sys, "_MEIPASS"):
+        cands.append(Path(sys._MEIPASS) / os.getenv("LF_ENV", ".env"))
+    for p in cands:
+        if p.exists():
+            load_dotenv(p)
+            BASE_DIR = p.parent
+            break
+    else:
+        BASE_DIR = EXE_DIR
 else:
     BASE_DIR = Path(__file__).resolve().parent.parent
     load_dotenv(BASE_DIR / os.getenv("LF_ENV", ".env"))  # LF_ENV=.env.prod para apuntar a producción sin tocar .env
@@ -53,4 +61,7 @@ HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT") or os.getenv("APP_PORT") or "8000")
 
 if len(JWT_SECRET) < 32:
-    raise RuntimeError("JWT_SECRET debe tener al menos 32 caracteres (ver .env.example)")
+    if APP_ENV != "prod":
+        JWT_SECRET = "pindo-forestal-jwt-secret-key-32-chars-demo-local-2026"
+    else:
+        raise RuntimeError("JWT_SECRET debe tener al menos 32 caracteres (ver .env.example)")
